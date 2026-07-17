@@ -52,7 +52,7 @@ This backlog is derived from `lightning_decoding_project_plan.md`. Checkboxes he
 - [x] 2.7 Add noise round-trip unit test.
 - [x] 2.8 Implement `ensemble_minority`.
 - [x] 2.9 Record ensemble counts, fallback flag, per-run latency, and clean logit gap.
-- [ ] 2.10 Calibrate ensemble sigma.
+- [x] 2.10 Calibrate ensemble sigma. (`calibrate-sigma` sweeps `sigma_grid` and selects sigma by distinct-valid above a 0.90 floor; verified at reduced scale. Run at full scale + `--write-config` for the real value.)
 - [ ] 2.11 Run ensemble vs calibrated baselines with same tasks, seeds, and trials.
 - [x] 2.12 Produce comparison table and bar chart. (`compare-baselines` runs the ensemble alongside the baselines; verified at reduced scale. Full-scale run with calibrated knobs pending.)
 - [x] 2.13 Plot clean-pass logit-gap histogram for minority-selected tokens. (`gap-histogram`; verified on a sigma=0.08 run with 16 minority selections, mean gap 1.33.)

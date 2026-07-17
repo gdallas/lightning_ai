@@ -8,7 +8,7 @@ from pathlib import Path
 import torch
 
 from lightning_decoding.analysis import analyze_depth, analyze_gap
-from lightning_decoding.calibrate import calibrate_experiment
+from lightning_decoding.calibrate import calibrate_experiment, calibrate_sigma
 from lightning_decoding.config import load_config
 from lightning_decoding.lens import CaptureHiddenStates, lens_argmax_per_layer
 from lightning_decoding.model_io import load_model, load_tokenizer
@@ -158,6 +158,19 @@ def cmd_calibrate(args: argparse.Namespace) -> None:
     print(json.dumps({"selected": report["selected"]}, indent=2, sort_keys=True))
 
 
+def cmd_calibrate_sigma(args: argparse.Namespace) -> None:
+    report = calibrate_sigma(
+        args.config,
+        validity_floor=args.validity_floor,
+        trials_per_prompt=args.trials,
+        max_prompts=args.max_prompts,
+        write_config=args.write_config,
+        local_files_only=args.local_files_only,
+    )
+    print(f"wrote {report['output_dir']}")
+    print(json.dumps({"selected": report["selected"]}, indent=2, sort_keys=True))
+
+
 def cmd_summarize(args: argparse.Namespace) -> None:
     path = Path(args.run_dir) / "summary.csv"
     print(path.read_text(encoding="utf-8"))
@@ -227,6 +240,15 @@ def build_parser() -> argparse.ArgumentParser:
     calibrate.add_argument("--write-config", action="store_true", help="Store selected knobs back into the config.")
     calibrate.add_argument("--local-files-only", action="store_true")
     calibrate.set_defaults(func=cmd_calibrate)
+
+    calibrate_sigma_cmd = sub.add_parser("calibrate-sigma", help="Sweep the ensemble sigma_grid.")
+    calibrate_sigma_cmd.add_argument("config")
+    calibrate_sigma_cmd.add_argument("--validity-floor", type=float, default=0.9)
+    calibrate_sigma_cmd.add_argument("--trials", type=int, default=None, help="Override trials_per_prompt.")
+    calibrate_sigma_cmd.add_argument("--max-prompts", type=int, default=None, help="Limit prompts for a fast sweep.")
+    calibrate_sigma_cmd.add_argument("--write-config", action="store_true", help="Store selected sigma back into the config.")
+    calibrate_sigma_cmd.add_argument("--local-files-only", action="store_true")
+    calibrate_sigma_cmd.set_defaults(func=cmd_calibrate_sigma)
 
     summarize = sub.add_parser("summarize", help="Print a run summary.csv.")
     summarize.add_argument("run_dir")
