@@ -4,6 +4,7 @@ from lightning_decoding.analysis import (
     classify_valid_trials,
     compare_depths,
     depth_groups,
+    minority_clean_gaps,
     modal_token_id,
 )
 
@@ -51,6 +52,25 @@ def test_compare_depths_handles_empty_group() -> None:
     assert result["novel"]["n"] == 0
     assert result["p_value"] is None
     assert result["mean_depth_gap"] is None
+
+
+def test_minority_clean_gaps_filters() -> None:
+    trials = [
+        {"method": "ensemble_minority", "decoder_meta": {"fallback": False, "clean_logit_gap": 2.5}},
+        {"method": "ensemble_minority", "decoder_meta": {"fallback": True, "clean_logit_gap": 0.0}},  # fallback
+        {"method": "ensemble_minority", "decoder_meta": {"fallback": False}},  # no gap recorded
+        {"method": "nucleus", "decoder_meta": {"fallback": False, "clean_logit_gap": 9.9}},  # wrong method
+    ]
+    assert minority_clean_gaps(trials) == [2.5]
+
+
+def test_gap_histogram_writes_file(tmp_path) -> None:
+    pytest.importorskip("matplotlib")
+    from lightning_decoding.analysis import save_gap_histogram
+
+    out = tmp_path / "gap.png"
+    save_gap_histogram([0.5, 1.2, 2.5, 3.0], out)
+    assert out.exists() and out.stat().st_size > 0
 
 
 def test_histogram_writes_file(tmp_path) -> None:

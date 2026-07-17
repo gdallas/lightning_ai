@@ -160,3 +160,67 @@ def analyze_depth(run_dir: str | Path) -> dict[str, Any]:
     save_commitment_histogram(modal, novel, histogram_path, num_layers=num_layers)
     comparison["histogram_path"] = str(histogram_path)
     return comparison
+
+
+def minority_clean_gaps(trials: list[dict[str, Any]]) -> list[float]:
+    """Clean-pass logit gaps for ensemble trials that selected a minority token.
+
+    A minority selection is a non-fallback ensemble trial: the ensemble picked a
+    perturbation-robust token other than the clean argmax. The gap is how far below
+    the clean top logit that token sat on the clean pass.
+    """
+    gaps: list[float] = []
+    for row in trials:
+        if row.get("method") != "ensemble_minority":
+            continue
+        meta = row.get("decoder_meta", {})
+        if meta.get("fallback"):
+            continue
+        gap = meta.get("clean_logit_gap")
+        if gap is not None:
+            gaps.append(float(gap))
+    return gaps
+
+
+def save_gap_histogram(gaps: list[float], output_path: str | Path) -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    from matplotlib import pyplot as plt
+
+    fig, ax = plt.subplots()
+    ax.hist(gaps, bins=20)
+    ax.set_xlabel("clean-pass logit gap (top logit - selected logit)")
+    ax.set_ylabel("minority-selected trials")
+    ax.set_title(f"Clean-pass logit gap for minority selections (n={len(gaps)})")
+    fig.tight_layout()
+    fig.savefig(output_path)
+    plt.close(fig)
+
+
+def analyze_gap(run_dir: str | Path) -> dict[str, Any]:
+    """Read an ensemble run and write the minority-selection clean-gap histogram."""
+    run_dir = Path(run_dir)
+    trials, _ = load_run(run_dir)
+    gaps = minority_clean_gaps(trials)
+    if not gaps:
+        raise SystemExit(
+            f"{run_dir} has no non-fallback ensemble_minority trials with clean_logit_gap"
+        )
+
+    stats = {
+        "run_dir": str(run_dir),
+        "n_minority": len(gaps),
+        "mean_gap": mean(gaps),
+        "median_gap": median(gaps),
+        "min_gap": min(gaps),
+        "max_gap": max(gaps),
+    }
+    with (run_dir / "gap_stats.json").open("w", encoding="utf-8") as handle:
+        json.dump(stats, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+
+    histogram_path = run_dir / "clean_gap_histogram.png"
+    save_gap_histogram(gaps, histogram_path)
+    stats["histogram_path"] = str(histogram_path)
+    return stats

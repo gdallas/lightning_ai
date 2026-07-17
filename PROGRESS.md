@@ -1,6 +1,6 @@
 # Progress
 
-Last updated: after the baseline comparison harness (1.B/1.C).
+Last updated: after Phase 2 ensemble reporting (2.12/2.13).
 
 ## Current State
 
@@ -31,6 +31,19 @@ pass at the Pythia-160m scale (see below).
 - Added `model.local_files_only` support to the experiment runner (config-driven).
 - Added fast unit tests: `test_lens.py`, `test_calibrate.py`. Suite is now 18 passing.
 - Tuned the category prompt template via a 24-template greedy sweep on Pythia-160m. [1.5]
+
+## Phase 2 Ensemble Reporting (2.12/2.13)
+
+- Added `gap-histogram` CLI + `analysis.minority_clean_gaps` / `save_gap_histogram`:
+  reads an ensemble run, plots the clean-pass logit gap for minority (non-fallback)
+  selections, and writes `clean_gap_histogram.png` + `gap_stats.json`. [2.13]
+- Added a `baselines:` section (including the ensemble) to `configs/phase2_ensemble.yaml`
+  so `compare-baselines` runs ensemble head-to-head with the baselines. [2.12]
+- Extended `test_analysis.py`; suite is now 28 passing.
+- Verified end-to-end: a sigma=0.08, N=10, k=2 run over 20 categories produced 16
+  minority selections out of 20 (4 fallbacks), clean-pass gaps 0.04-3.93 (mean 1.33,
+  median 1.16). `compare-baselines` on the phase2 config emits the ensemble-vs-baselines
+  table + CI bar charts. Calibrated sigma (2.10) and full-scale runs (2.11/2.B) remain open.
 
 ## Baseline Comparison Harness (1.B/1.C)
 

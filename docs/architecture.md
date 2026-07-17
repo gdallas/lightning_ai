@@ -16,7 +16,8 @@ The core modules are intentionally small and testable:
 - `lens.py`: logit-lens projection, the `CaptureHiddenStates` forward-hook context
   manager, and commitment-depth helpers.
 - `calibrate.py`: sweeps a config's `calibration_grid` and selects per-method knobs.
-- `analysis.py`: modal-vs-novel labelling and Mann-Whitney commitment-depth comparison.
+- `analysis.py`: modal-vs-novel labelling, Mann-Whitney commitment-depth comparison, and
+  the ensemble clean-pass gap histogram.
 - `report.py`: runs a config's `baselines` and builds a comparison table + CI bar charts.
 
 The runner writes a complete run folder for every experiment so results can be
