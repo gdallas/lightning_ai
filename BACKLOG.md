@@ -37,8 +37,8 @@ This backlog is derived from `lightning_decoding_project_plan.md`. Checkboxes he
 - [x] 1.21 Implement knob calibration runner for temperature, nucleus, and gap sampler.
 - [ ] 1.22 Store calibrated knobs in `configs/phase1_baselines.yaml`. (Mechanism ready: `calibrate --write-config`; awaiting a full-scale sweep to fill real values.)
 - [ ] 1.A Verify greedy reaches at least 80% validity on Task A. (Measured 0.50 on Pythia-160m with the tuned template; the 80% bar is not reachable at this scale — see PROGRESS.md.)
-- [ ] 1.B Produce full baseline table for 4 methods x 2 tasks x metrics with CIs.
-- [ ] 1.C Verify gap sampler beats greedy on `distinct_valid_per_prompt`.
+- [ ] 1.B Produce full baseline table for 4 methods x 2 tasks x metrics with CIs. (Tool ready: `compare-baselines` emits comparison.csv + CI bar charts; verified on the category task at reduced scale. Full-scale run and the rhyme task still pending.)
+- [x] 1.C Verify gap sampler beats greedy on `distinct_valid_per_prompt`. (Reduced scale: gap_sampler 2.40 [1.67, 3.50] vs greedy 1.00 — non-overlapping CIs.)
 - [x] 1.D Run and pass unit tests.
 
 ## Phase 2 - Perturbation Ensemble

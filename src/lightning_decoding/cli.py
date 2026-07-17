@@ -12,6 +12,7 @@ from lightning_decoding.calibrate import calibrate_experiment
 from lightning_decoding.config import load_config
 from lightning_decoding.lens import CaptureHiddenStates, lens_argmax_per_layer
 from lightning_decoding.model_io import load_model, load_tokenizer
+from lightning_decoding.report import compare_baselines
 from lightning_decoding.runner import run_experiment
 from lightning_decoding.token_spaces import filter_category_file
 
@@ -122,6 +123,22 @@ def cmd_analyze_depth(args: argparse.Namespace) -> None:
     print(json.dumps({k: v for k, v in result.items() if k != "histogram_path"}, indent=2, sort_keys=True))
 
 
+def cmd_compare_baselines(args: argparse.Namespace) -> None:
+    report = compare_baselines(
+        args.config,
+        trials=args.trials,
+        max_prompts=args.max_prompts,
+        local_files_only=args.local_files_only,
+    )
+    print(f"wrote {report['output_dir']}")
+    for row in report["rows"]:
+        print(
+            f"  {row['label']:>14}: validity={row['validity_rate']:.3f} "
+            f"distinct={row['distinct_valid_per_prompt']:.3f} "
+            f"[{row['distinct_valid_ci_low']:.2f}, {row['distinct_valid_ci_high']:.2f}]"
+        )
+
+
 def cmd_calibrate(args: argparse.Namespace) -> None:
     report = calibrate_experiment(
         args.config,
@@ -184,6 +201,13 @@ def build_parser() -> argparse.ArgumentParser:
     analyze_depth_cmd = sub.add_parser("analyze-depth", help="Modal-vs-novel commitment-depth analysis of a capture run.")
     analyze_depth_cmd.add_argument("run_dir")
     analyze_depth_cmd.set_defaults(func=cmd_analyze_depth)
+
+    compare = sub.add_parser("compare-baselines", help="Run a config's baselines list and build a comparison table.")
+    compare.add_argument("config")
+    compare.add_argument("--trials", type=int, default=None, help="Override trials_per_prompt.")
+    compare.add_argument("--max-prompts", type=int, default=None, help="Limit prompts for a fast run.")
+    compare.add_argument("--local-files-only", action="store_true")
+    compare.set_defaults(func=cmd_compare_baselines)
 
     calibrate = sub.add_parser("calibrate", help="Sweep decoder knobs from a config's calibration_grid.")
     calibrate.add_argument("config")

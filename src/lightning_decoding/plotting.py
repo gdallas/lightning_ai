@@ -4,7 +4,10 @@ from pathlib import Path
 
 
 def save_metric_bar(summary_csv: str | Path, output_path: str | Path, metric: str) -> None:
+    import matplotlib
     import pandas as pd
+
+    matplotlib.use("Agg")
     from matplotlib import pyplot as plt
 
     data = pd.read_csv(summary_csv)
