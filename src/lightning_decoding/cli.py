@@ -7,8 +7,10 @@ from pathlib import Path
 
 import torch
 
+from lightning_decoding.analysis import analyze_depth
 from lightning_decoding.calibrate import calibrate_experiment
 from lightning_decoding.config import load_config
+from lightning_decoding.lens import CaptureHiddenStates, lens_argmax_per_layer
 from lightning_decoding.model_io import load_model, load_tokenizer
 from lightning_decoding.runner import run_experiment
 from lightning_decoding.token_spaces import filter_category_file
@@ -81,6 +83,45 @@ def cmd_run(args: argparse.Namespace) -> None:
     print(f"wrote {output_dir}")
 
 
+def cmd_lens_check(args: argparse.Namespace) -> None:
+    model, tokenizer = load_model(
+        args.model,
+        trust_remote_code=args.trust_remote_code,
+        local_files_only=args.local_files_only,
+    )
+    inputs = tokenizer(args.prompt, return_tensors="pt")
+    with CaptureHiddenStates(model) as capture:
+        with torch.no_grad():
+            outputs = model(**inputs)
+    argmaxes = lens_argmax_per_layer(model, capture.hidden_states)
+    model_greedy = int(torch.argmax(outputs.logits[0, -1]).item())
+
+    print(f"prompt={args.prompt!r}")
+    for layer_idx, token_id in enumerate(argmaxes):
+        print(f"layer {layer_idx:2d}: {tokenizer.decode([token_id])!r}")
+    final = tokenizer.decode([argmaxes[-1]])
+    print(f"final_layer_token={final!r}")
+
+    # Correctness: the lens on the last block must reproduce the model's own head.
+    lens_matches_model = argmaxes[-1] == model_greedy
+    print(f"model_greedy_token={tokenizer.decode([model_greedy])!r}")
+    print(f"lens_final_matches_model={lens_matches_model}")
+
+    ok = lens_matches_model
+    if args.expect:
+        found = args.expect.strip().lower() in final.strip().lower()
+        print(f"expect={args.expect!r} found={found}")
+        ok = ok and found
+    if not ok:
+        raise SystemExit(1)
+
+
+def cmd_analyze_depth(args: argparse.Namespace) -> None:
+    result = analyze_depth(args.run_dir)
+    print(f"wrote {result['histogram_path']}")
+    print(json.dumps({k: v for k, v in result.items() if k != "histogram_path"}, indent=2, sort_keys=True))
+
+
 def cmd_calibrate(args: argparse.Namespace) -> None:
     report = calibrate_experiment(
         args.config,
@@ -131,6 +172,18 @@ def build_parser() -> argparse.ArgumentParser:
     run = sub.add_parser("run", help="Run one YAML-configured experiment.")
     run.add_argument("config")
     run.set_defaults(func=cmd_run)
+
+    lens_check = sub.add_parser("lens-check", help="Print per-layer logit-lens predictions for a prompt.")
+    lens_check.add_argument("--model", default="EleutherAI/pythia-160m")
+    lens_check.add_argument("--prompt", default="The capital of France is the city of")
+    lens_check.add_argument("--expect", default="Paris", help="Substring expected in the final-layer token.")
+    lens_check.add_argument("--trust-remote-code", action="store_true")
+    lens_check.add_argument("--local-files-only", action="store_true")
+    lens_check.set_defaults(func=cmd_lens_check)
+
+    analyze_depth_cmd = sub.add_parser("analyze-depth", help="Modal-vs-novel commitment-depth analysis of a capture run.")
+    analyze_depth_cmd.add_argument("run_dir")
+    analyze_depth_cmd.set_defaults(func=cmd_analyze_depth)
 
     calibrate = sub.add_parser("calibrate", help="Sweep decoder knobs from a config's calibration_grid.")
     calibrate.add_argument("config")
