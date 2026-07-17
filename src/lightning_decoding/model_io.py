@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-from functools import lru_cache
 from typing import Any
 
 import torch
@@ -13,27 +12,42 @@ def configure_torch_threads(num_threads: int | None = None) -> None:
     torch.set_num_threads(threads)
 
 
-@lru_cache(maxsize=1)
-def _threads_configured() -> bool:
-    configure_torch_threads()
-    return True
+configure_torch_threads()
 
 
-def load_model(name: str, *, trust_remote_code: bool = False) -> tuple[Any, Any]:
-    _threads_configured()
-    tokenizer = load_tokenizer(name, trust_remote_code=trust_remote_code)
+def load_model(
+    name: str,
+    *,
+    trust_remote_code: bool = False,
+    local_files_only: bool = False,
+) -> tuple[Any, Any]:
+    tokenizer = load_tokenizer(
+        name,
+        trust_remote_code=trust_remote_code,
+        local_files_only=local_files_only,
+    )
     model = AutoModelForCausalLM.from_pretrained(
         name,
         torch_dtype=torch.float32,
         device_map=None,
         trust_remote_code=trust_remote_code,
+        local_files_only=local_files_only,
     )
     model.eval()
     return model, tokenizer
 
 
-def load_tokenizer(name: str, *, trust_remote_code: bool = False) -> Any:
-    return AutoTokenizer.from_pretrained(name, trust_remote_code=trust_remote_code)
+def load_tokenizer(
+    name: str,
+    *,
+    trust_remote_code: bool = False,
+    local_files_only: bool = False,
+) -> Any:
+    return AutoTokenizer.from_pretrained(
+        name,
+        trust_remote_code=trust_remote_code,
+        local_files_only=local_files_only,
+    )
 
 
 def format_prompt(tokenizer: Any, model_name: str, prompt: str) -> str:

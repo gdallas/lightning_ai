@@ -13,7 +13,9 @@ The core modules are intentionally small and testable:
 - `decoders.py`: greedy, sampling, gap, and perturbation-ensemble decoders.
 - `noise.py`: deterministic in-place weight perturbation and restoration.
 - `metrics.py`: validity, diversity, coverage, mode-share, and bootstrap CIs.
-- `lens.py`: logit-lens projection and commitment-depth helpers.
+- `lens.py`: logit-lens projection, the `CaptureHiddenStates` forward-hook context
+  manager, and commitment-depth helpers.
+- `calibrate.py`: sweeps a config's `calibration_grid` and selects per-method knobs.
 
 The runner writes a complete run folder for every experiment so results can be
 audited without reconstructing command-line state from memory.

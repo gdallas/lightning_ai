@@ -8,8 +8,11 @@ model:
 
 task:
   type: category
+  # Tuned via greedy validation on Pythia-160m (see README "Prompt Calibration").
+  # This stem beats "Q: Name one {category}.\nA: One {category} is the" (0.00 greedy
+  # validity) by a wide margin (0.50) on the 20 base categories.
   path: data/categories.json
-  prompt_template: "Q: Name one {category}.\nA: One {category} is the"
+  prompt_template: "The most common {category} is the"
 
 decoder:
   method: greedy

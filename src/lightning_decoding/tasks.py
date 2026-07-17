@@ -29,7 +29,8 @@ def normalize_single_word(answer: str) -> str:
         return ""
     first = text.split()[0]
     first = first.strip(string.punctuation + "\"'`")
-    if len(first) > 3 and first.endswith("s") and not first.endswith("ss"):
+    singular_s_endings = ("ss", "is", "us")
+    if len(first) > 3 and first.endswith("s") and not first.endswith(singular_s_endings):
         first = first[:-1]
     return first
 
@@ -37,7 +38,7 @@ def normalize_single_word(answer: str) -> str:
 @dataclass
 class CategoryTask:
     categories: dict[str, list[str]]
-    prompt_template: str = "Q: Name one {category}.\nA: One {category} is the"
+    prompt_template: str = "The most common {category} is the"
     name: str = "category"
 
     @classmethod
@@ -116,4 +117,3 @@ def load_task(cfg: dict) -> Task:
     if task_type == "rhyme":
         return RhymeTask.from_json(cfg["path"], prompt_template)
     raise ValueError(f"Unknown task type: {task_type}")
-
