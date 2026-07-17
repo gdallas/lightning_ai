@@ -67,6 +67,27 @@ The command writes a `calibration.json` report under `results/` and, with
 `--write-config`, stores the selected knobs back under a `calibrated:` key in the config.
 Use `--max-prompts` and `--trials` to run a fast reduced-scale sweep first.
 
+## Commitment-Depth Study
+
+Sanity-check the logit lens (per-layer predictions should sharpen to the model's own
+next-token prediction):
+
+```bash
+lightning-decoding lens-check
+```
+
+Run a decoder with `experiment.capture_hidden_states: true` (see `configs/phase4_lens.yaml`),
+then analyze how deep in the network valid tokens are decided. Answers matching the clean
+greedy token are labelled `modal`; valid alternatives are `novel`:
+
+```bash
+lightning-decoding run configs/phase4_lens.yaml
+lightning-decoding analyze-depth results/<run-folder>
+```
+
+`analyze-depth` writes `depth_comparison.json` (a Mann-Whitney U test of modal vs novel
+commitment depth) and `commitment_histogram.png` into the run folder.
+
 ## Prompt Calibration
 
 The category prompt template is tuned by greedy validation. On Pythia-160m the original

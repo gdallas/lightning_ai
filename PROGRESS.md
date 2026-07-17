@@ -1,6 +1,6 @@
 # Progress
 
-Last updated: after Phase 1 harness work (prompt calibration, hidden-state capture, knob calibration).
+Last updated: after Phase 4 commitment-depth study scaffolding.
 
 ## Current State
 
@@ -31,6 +31,27 @@ pass at the Pythia-160m scale (see below).
 - Added `model.local_files_only` support to the experiment runner (config-driven).
 - Added fast unit tests: `test_lens.py`, `test_calibrate.py`. Suite is now 18 passing.
 - Tuned the category prompt template via a 24-template greedy sweep on Pythia-160m. [1.5]
+
+## Phase 4 Session (commitment-depth study)
+
+- Added `lens-check` CLI: prints per-layer logit-lens predictions and asserts the
+  final-layer lens argmax equals the model head. [4.A]
+- Implemented `analysis.py` + `analyze-depth` CLI: labels valid trials modal vs novel,
+  runs a Mann-Whitney U test on commitment depth, and writes `depth_comparison.json`
+  plus `commitment_histogram.png`. [4.5, 4.6, 4.7]
+- Added `test_analysis.py` (labeling, comparison, empty-group handling, histogram). Suite
+  is now 24 passing.
+- Ran the study end-to-end at reduced scale (nucleus p=0.95, R=15 over 20 categories with
+  hidden-state capture) and produced real artifacts. [4.4 partial, 4.B]
+
+### Phase 4 results (reduced scale — not yet the headline run)
+
+- Lens sanity check: on `"The capital of France is the city of"` the lens sharpens to
+  `" Paris"` by layer 8 and the final layer matches the model's greedy token.
+- Commitment depth: modal tokens (n=11) mean depth 10.5; novel valid tokens (n=31) mean
+  depth 12.0 (mostly never a sustained lens argmax). Mann-Whitney U=341, p=2.8e-10;
+  novel tokens commit ~1.5 layers later. Consistent with H1, but at R=15 with an
+  uncalibrated nucleus knob — rerun at R=50 with calibrated `p` for the headline claim.
 
 ## Key Findings
 
@@ -120,3 +141,5 @@ No experiment folders are committed; `results/` is gitignored (contains only `.g
    relax the acceptance criterion, since 0.80 greedy validity is unreachable at 160m.
 4. Expand category wordlists to 50-300 accepted answers and spot-check them (1.3/1.4).
 5. Add ensemble sigma calibration (2.10) to the calibration grid/runner.
+6. Rerun the Phase 4 depth study at R=50 with the calibrated nucleus `p` for headline
+   numbers (4.4), then regenerate `depth_comparison.json` + histogram via `analyze-depth`.
