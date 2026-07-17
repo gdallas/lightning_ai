@@ -12,3 +12,11 @@ experiment:
 
 sigma_grid: [0.005, 0.01, 0.02, 0.05, 0.1]
 
+# Ensemble vs baselines (2.12). Baseline knobs are placeholders until calibrated;
+# ensemble sigma should come from the sigma_grid sweep (2.10).
+baselines:
+  - {label: greedy, method: greedy}
+  - {label: nucleus, method: nucleus, p: 0.95}
+  - {label: gap_sampler, method: gap_sampler, delta: 2.0}
+  - {label: ensemble, method: ensemble_minority, sigma: 0.02, N: 10, k: 3}
+

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import torch
 
-from lightning_decoding.analysis import analyze_depth
+from lightning_decoding.analysis import analyze_depth, analyze_gap
 from lightning_decoding.calibrate import calibrate_experiment
 from lightning_decoding.config import load_config
 from lightning_decoding.lens import CaptureHiddenStates, lens_argmax_per_layer
@@ -139,6 +139,12 @@ def cmd_compare_baselines(args: argparse.Namespace) -> None:
         )
 
 
+def cmd_gap_histogram(args: argparse.Namespace) -> None:
+    stats = analyze_gap(args.run_dir)
+    print(f"wrote {stats['histogram_path']}")
+    print(json.dumps({k: v for k, v in stats.items() if k != "histogram_path"}, indent=2, sort_keys=True))
+
+
 def cmd_calibrate(args: argparse.Namespace) -> None:
     report = calibrate_experiment(
         args.config,
@@ -201,6 +207,10 @@ def build_parser() -> argparse.ArgumentParser:
     analyze_depth_cmd = sub.add_parser("analyze-depth", help="Modal-vs-novel commitment-depth analysis of a capture run.")
     analyze_depth_cmd.add_argument("run_dir")
     analyze_depth_cmd.set_defaults(func=cmd_analyze_depth)
+
+    gap_hist = sub.add_parser("gap-histogram", help="Clean-pass logit-gap histogram for ensemble minority selections.")
+    gap_hist.add_argument("run_dir")
+    gap_hist.set_defaults(func=cmd_gap_histogram)
 
     compare = sub.add_parser("compare-baselines", help="Run a config's baselines list and build a comparison table.")
     compare.add_argument("config")

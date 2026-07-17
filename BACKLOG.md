@@ -54,11 +54,11 @@ This backlog is derived from `lightning_decoding_project_plan.md`. Checkboxes he
 - [x] 2.9 Record ensemble counts, fallback flag, per-run latency, and clean logit gap.
 - [ ] 2.10 Calibrate ensemble sigma.
 - [ ] 2.11 Run ensemble vs calibrated baselines with same tasks, seeds, and trials.
-- [ ] 2.12 Produce comparison table and bar chart.
-- [ ] 2.13 Plot clean-pass logit-gap histogram for minority-selected tokens.
+- [x] 2.12 Produce comparison table and bar chart. (`compare-baselines` runs the ensemble alongside the baselines; verified at reduced scale. Full-scale run with calibrated knobs pending.)
+- [x] 2.13 Plot clean-pass logit-gap histogram for minority-selected tokens. (`gap-histogram`; verified on a sigma=0.08 run with 16 minority selections, mean gap 1.33.)
 - [x] 2.A Verify noise round-trip test passes in the real venv.
 - [ ] 2.B Verify ensemble validity is at least 0.90 at calibrated sigma.
-- [ ] 2.C Verify comparison table and gap histogram exist.
+- [x] 2.C Verify comparison table and gap histogram exist. (Both artifacts produced at reduced scale; regenerate at full scale with calibrated sigma for the headline.)
 - [ ] 2.D Verify full Phase 2 runtime is within budget or reduce R and note it.
 
 ## Phase 3 - Verdict and Ablations

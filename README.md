@@ -101,6 +101,17 @@ lightning-decoding analyze-depth results/<run-folder>
 `analyze-depth` writes `depth_comparison.json` (a Mann-Whitney U test of modal vs novel
 commitment depth) and `commitment_histogram.png` into the run folder.
 
+For a perturbation-ensemble run, plot how far below the clean top logit the
+minority-selected tokens sat:
+
+```bash
+lightning-decoding run configs/phase2_ensemble.yaml
+lightning-decoding gap-histogram results/<run-folder>
+```
+
+This writes `clean_gap_histogram.png` + `gap_stats.json` for the non-fallback ensemble
+selections.
+
 ## Prompt Calibration
 
 The category prompt template is tuned by greedy validation. On Pythia-160m the original
