@@ -1,6 +1,6 @@
 # Progress
 
-Last updated: after Phase 2 ensemble reporting (2.12/2.13).
+Last updated: after ensemble sigma calibration (2.10).
 
 ## Current State
 
@@ -31,6 +31,15 @@ pass at the Pythia-160m scale (see below).
 - Added `model.local_files_only` support to the experiment runner (config-driven).
 - Added fast unit tests: `test_lens.py`, `test_calibrate.py`. Suite is now 18 passing.
 - Tuned the category prompt template via a 24-template greedy sweep on Pythia-160m. [1.5]
+
+## Ensemble Sigma Calibration (2.10)
+
+- Added `calibrate_sigma` + `calibrate-sigma` CLI: sweeps the ensemble `sigma_grid`
+  (fixed N/k from the config), selects sigma by distinct-valid subject to a validity
+  floor (default 0.90, per 2.B), writes `sigma_calibration.json`, and can `--write-config`.
+- Added a pure `sigma_settings` helper with unit tests; suite is now 31 passing.
+- Verified end-to-end at reduced scale (all 5 sigmas swept, selection + report + CLI).
+  Full-scale sweep for the real calibrated sigma remains a heavier run for the user.
 
 ## Phase 2 Ensemble Reporting (2.12/2.13)
 

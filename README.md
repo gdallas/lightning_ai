@@ -80,6 +80,13 @@ The command writes a `calibration.json` report under `results/` and, with
 `--write-config`, stores the selected knobs back under a `calibrated:` key in the config.
 Use `--max-prompts` and `--trials` to run a fast reduced-scale sweep first.
 
+The perturbation-ensemble sigma is calibrated separately from its own `sigma_grid`
+(selecting sigma by distinct-valid subject to a 0.90 validity floor):
+
+```bash
+lightning-decoding calibrate-sigma configs/phase2_ensemble.yaml --write-config
+```
+
 ## Commitment-Depth Study
 
 Sanity-check the logit lens (per-layer predictions should sharpen to the model's own
