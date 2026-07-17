@@ -17,6 +17,7 @@ The core modules are intentionally small and testable:
   manager, and commitment-depth helpers.
 - `calibrate.py`: sweeps a config's `calibration_grid` and selects per-method knobs.
 - `analysis.py`: modal-vs-novel labelling and Mann-Whitney commitment-depth comparison.
+- `report.py`: runs a config's `baselines` and builds a comparison table + CI bar charts.
 
 The runner writes a complete run folder for every experiment so results can be
 audited without reconstructing command-line state from memory.

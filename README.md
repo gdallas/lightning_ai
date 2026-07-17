@@ -53,6 +53,19 @@ Results are written under `results/` as reproducible run folders containing:
 - `summary.csv`
 - `lens_per_prompt.jsonl` (only when `experiment.capture_hidden_states` is set)
 
+## Baseline Comparison
+
+Run every decoder listed in a config's `baselines` section over the same task, seed, and
+trial count, then emit a comparison table and CI bar charts:
+
+```bash
+lightning-decoding compare-baselines configs/phase1_baselines.yaml
+```
+
+The run folder gets `comparison.csv` (validity, distinct-valid with bootstrap CIs,
+coverage, mode-share per method) plus `comparison_distinct_valid.png` and
+`comparison_validity.png`. Use `--max-prompts` / `--trials` for a fast reduced-scale run.
+
 ## Calibrating Decoder Knobs
 
 Sweep the `calibration_grid` in a config to pick per-method knobs (temperature `T`,

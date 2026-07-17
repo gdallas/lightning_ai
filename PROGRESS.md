@@ -1,6 +1,6 @@
 # Progress
 
-Last updated: after Phase 4 commitment-depth study scaffolding.
+Last updated: after the baseline comparison harness (1.B/1.C).
 
 ## Current State
 
@@ -31,6 +31,20 @@ pass at the Pythia-160m scale (see below).
 - Added `model.local_files_only` support to the experiment runner (config-driven).
 - Added fast unit tests: `test_lens.py`, `test_calibrate.py`. Suite is now 18 passing.
 - Tuned the category prompt template via a 24-template greedy sweep on Pythia-160m. [1.5]
+
+## Baseline Comparison Harness (1.B/1.C)
+
+- Implemented `report.py` + `compare-baselines` CLI: runs every decoder in a config's
+  `baselines` list over one shared task (same prompts/seed/trials), writing
+  `comparison.csv`, `comparison.json`, and CI bar charts. Added a `baselines:` section to
+  `configs/phase1_baselines.yaml`.
+- Forced the non-interactive matplotlib `Agg` backend in all plotting helpers so charts
+  render headless (the machine defaulted to Tk, which failed on save).
+- Added `test_report.py`; suite is now 26 passing.
+- Reduced-scale run (category task, 8 prompts x 6 trials): validity / distinct-valid were
+  greedy 0.63 / 1.00, temperature 0.10 / 1.25, nucleus 0.19 / 2.00, gap_sampler 0.33 /
+  2.40 [1.67, 3.50]. Gap sampler beats greedy on distinct-valid with non-overlapping CIs
+  (1.C). Full 4x2 table at full scale is still pending (1.B).
 
 ## Phase 4 Session (commitment-depth study)
 

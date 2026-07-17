@@ -16,3 +16,11 @@ calibration_grid:
   gap_sampler:
     delta: [1, 2, 3, 4, 6]
 
+# The 4 Phase 1 baselines (1.B). Knob values are placeholders until a full
+# `calibrate --write-config` sweep fills them in; edit them to the calibrated knobs.
+baselines:
+  - {label: greedy, method: greedy}
+  - {label: temperature, method: temperature, T: 1.0}
+  - {label: nucleus, method: nucleus, p: 0.95}
+  - {label: gap_sampler, method: gap_sampler, delta: 2.0}
+

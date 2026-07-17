@@ -111,6 +111,9 @@ def save_commitment_histogram(
     *,
     num_layers: int | None = None,
 ) -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
     from matplotlib import pyplot as plt
 
     max_depth = max([*modal, *novel, num_layers or 0], default=0)
