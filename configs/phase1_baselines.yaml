@@ -1,0 +1,18 @@
+extends: base.yaml
+name: phase1_gap_sampler_smoke
+
+decoder:
+  method: gap_sampler
+  delta: 2.0
+
+experiment:
+  trials_per_prompt: 3
+
+calibration_grid:
+  temperature:
+    T: [0.7, 1.0, 1.3, 1.6, 2.0]
+  nucleus:
+    p: [0.9, 0.95, 0.98, 0.995]
+  gap_sampler:
+    delta: [1, 2, 3, 4, 6]
+

@@ -1,0 +1,14 @@
+extends: base.yaml
+name: phase2_ensemble_smoke
+
+decoder:
+  method: ensemble_minority
+  sigma: 0.02
+  N: 10
+  k: 3
+
+experiment:
+  trials_per_prompt: 3
+
+sigma_grid: [0.005, 0.01, 0.02, 0.05, 0.1]
+

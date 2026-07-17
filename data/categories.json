@@ -1,0 +1,23 @@
+{
+  "animal": ["cat", "dog", "horse", "lion", "tiger", "bear", "wolf", "fox", "deer", "cow", "goat", "sheep", "pig", "rabbit", "mouse", "rat", "monkey", "zebra", "giraffe", "elephant", "camel", "donkey", "seal", "whale", "dolphin"],
+  "beverage": ["water", "tea", "coffee", "juice", "milk", "soda", "beer", "wine", "cider", "lemonade", "cola", "cocoa", "smoothie", "shake", "espresso", "latte", "mocha", "kombucha", "punch", "tonic"],
+  "bird": ["crow", "raven", "sparrow", "eagle", "hawk", "owl", "duck", "goose", "swan", "turkey", "chicken", "pigeon", "parrot", "finch", "robin", "falcon", "pelican", "stork", "crane", "heron"],
+  "body of water": ["river", "lake", "ocean", "sea", "bay", "gulf", "pond", "stream", "creek", "lagoon", "canal", "fjord", "strait", "channel", "reservoir", "spring", "marsh", "swamp", "brook", "waterfall"],
+  "city": ["paris", "london", "tokyo", "berlin", "rome", "madrid", "dublin", "vienna", "prague", "sydney", "beijing", "seoul", "mumbai", "cairo", "nairobi", "lagos", "toronto", "chicago", "boston", "miami"],
+  "color": ["red", "blue", "green", "yellow", "orange", "purple", "pink", "black", "white", "gray", "brown", "violet", "indigo", "cyan", "magenta", "gold", "silver", "bronze", "teal", "navy"],
+  "country": ["france", "spain", "italy", "germany", "canada", "mexico", "brazil", "chile", "peru", "china", "japan", "india", "egypt", "kenya", "nigeria", "ireland", "poland", "sweden", "norway", "turkey"],
+  "fish": ["salmon", "trout", "tuna", "cod", "bass", "carp", "perch", "pike", "herring", "sardine", "anchovy", "mackerel", "halibut", "flounder", "catfish", "marlin", "swordfish", "tilapia", "snapper", "grouper"],
+  "flower": ["rose", "tulip", "lily", "daisy", "orchid", "violet", "poppy", "iris", "peony", "dahlia", "marigold", "lavender", "sunflower", "carnation", "jasmine", "hibiscus", "lotus", "azalea", "begonia", "clover"],
+  "fruit": ["apple", "banana", "orange", "pear", "peach", "plum", "grape", "melon", "mango", "lemon", "lime", "cherry", "berry", "fig", "date", "kiwi", "papaya", "apricot", "coconut", "pineapple"],
+  "gemstone": ["diamond", "ruby", "emerald", "sapphire", "opal", "topaz", "amethyst", "garnet", "pearl", "jade", "quartz", "onyx", "agate", "turquoise", "beryl", "zircon", "peridot", "citrine", "moonstone", "lapis"],
+  "insect": ["ant", "bee", "wasp", "fly", "moth", "beetle", "cricket", "termite", "flea", "gnat", "weevil", "locust", "cicada", "mantis", "aphid", "hornet", "dragonfly", "firefly", "ladybug", "mosquito"],
+  "metal": ["iron", "gold", "silver", "copper", "tin", "lead", "zinc", "nickel", "steel", "bronze", "brass", "aluminum", "titanium", "platinum", "mercury", "chromium", "cobalt", "lithium", "sodium", "uranium"],
+  "musical instrument": ["piano", "guitar", "violin", "cello", "drum", "flute", "trumpet", "trombone", "clarinet", "saxophone", "banjo", "harp", "organ", "bassoon", "oboe", "mandolin", "ukulele", "accordion", "xylophone", "sitar"],
+  "planet": ["mercury", "venus", "earth", "mars", "jupiter", "saturn", "uranus", "neptune"],
+  "profession": ["doctor", "nurse", "teacher", "lawyer", "engineer", "artist", "writer", "chef", "farmer", "pilot", "driver", "baker", "carpenter", "plumber", "dentist", "scientist", "actor", "singer", "designer", "accountant"],
+  "sport": ["soccer", "baseball", "basketball", "tennis", "golf", "hockey", "cricket", "rugby", "boxing", "cycling", "skiing", "running", "swimming", "rowing", "surfing", "wrestling", "volleyball", "badminton", "archery", "fencing"],
+  "tree": ["oak", "maple", "pine", "cedar", "birch", "elm", "ash", "willow", "spruce", "fir", "poplar", "beech", "walnut", "cherry", "apple", "palm", "cypress", "redwood", "sequoia", "sycamore"],
+  "vegetable": ["carrot", "potato", "onion", "pepper", "tomato", "lettuce", "cabbage", "celery", "spinach", "broccoli", "garlic", "pea", "bean", "corn", "turnip", "radish", "squash", "zucchini", "cucumber", "pumpkin"],
+  "vehicle": ["car", "truck", "bus", "train", "plane", "boat", "ship", "bicycle", "motorcycle", "scooter", "tram", "subway", "taxi", "van", "tractor", "ferry", "canoe", "kayak", "helicopter", "rocket"]
+}
+

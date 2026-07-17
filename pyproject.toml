@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lightning-decoding"
+version = "0.1.0"
+description = "Robust-minority decoding under weight perturbation, plus logit-lens commitment-depth experiments."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "GPL-3.0-only"
+authors = [{ name = "George Dallas" }]
+dependencies = [
+  "torch>=2.2,<3",
+  "transformers>=4.43,<5",
+  "pyyaml>=6.0",
+  "pandas>=2.0,<4",
+  "matplotlib>=3.8,<4",
+  "pronouncing>=0.2",
+  "scipy>=1.11,<2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.5",
+]
+
+[project.scripts]
+lightning-decoding = "lightning_decoding.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+  "integration: tests that may download or load Hugging Face models",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

@@ -1,0 +1,19 @@
+name: base
+seed: 42
+output_root: results
+
+model:
+  name: EleutherAI/pythia-160m
+  trust_remote_code: false
+
+task:
+  type: category
+  path: data/categories.json
+  prompt_template: "Q: Name one {category}.\nA: One {category} is the"
+
+decoder:
+  method: greedy
+
+experiment:
+  trials_per_prompt: 1
+
