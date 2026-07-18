@@ -1,6 +1,6 @@
 # Progress
 
-Last updated: after ensemble sigma calibration (2.10).
+Last updated: after the full R=50 commitment-depth study (4.4).
 
 ## Current State
 
@@ -31,6 +31,28 @@ pass at the Pythia-160m scale (see below).
 - Added `model.local_files_only` support to the experiment runner (config-driven).
 - Added fast unit tests: `test_lens.py`, `test_calibrate.py`. Suite is now 18 passing.
 - Tuned the category prompt template via a 24-template greedy sweep on Pythia-160m. [1.5]
+
+## Full Commitment-Depth Study (4.4) — first real experiment result
+
+Ran the real Phase 4 study: nucleus p=0.95, **R=50** over the 20 Task-A categories with
+hidden-state capture (`configs/phase4_lens.yaml`), 1,000 trials total.
+
+- **Nucleus diversity:** 136 valid trials (13.6% per-sample validity at p=0.95),
+  **3.82 distinct valid answers/prompt** [2.92, 4.70].
+- **Depth comparison:** modal (n=36) mean depth 10.6; novel (n=100) depth 12;
+  Mann-Whitney U=3600, **p=1.5e-30**.
+- **The substantive slice (added `visibility` to `analyze-depth`):** modal answers
+  commit *only* at layers 10-11 of 12 (13 at L10, 23 at L11) — the model settles on its
+  obvious answer in the last one or two layers. **Only 3 of 100 novel valid answers ever
+  appear as the top lens prediction at any layer** (and those flash at L7 before being
+  overwritten).
+
+Interpretation: the plain commitment-depth gap is partly definitional (a novel token can
+never be the sustained top prediction, so it always lands at `num_layers`). The real,
+non-tautological finding is the visibility rate: **valid alternative answers are almost
+invisible to the greedy/lens view (~3%)** — which is precisely the gap the perturbation
+ensemble is meant to exploit. A richer per-layer metric (lens rank/probability trajectory,
+not just argmax) is the natural follow-up if we want to grade *how close* novel tokens get.
 
 ## Ensemble Sigma Calibration (2.10)
 

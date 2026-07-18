@@ -1,11 +1,14 @@
 extends: base.yaml
-name: phase4_lens_smoke
+name: phase4_depth_study
 
 decoder:
   method: nucleus
+  # p=0.95 is the standard nucleus default. Formal per-method calibration
+  # (calibrate) is a separate step and does not affect the depth question.
   p: 0.95
 
 experiment:
-  trials_per_prompt: 5
+  # R=50 samples per Task-A prompt with hidden-state capture (ticket 4.4).
+  trials_per_prompt: 50
   capture_hidden_states: true
 

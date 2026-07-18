@@ -4,6 +4,7 @@ from lightning_decoding.analysis import (
     classify_valid_trials,
     compare_depths,
     depth_groups,
+    lens_visibility,
     minority_clean_gaps,
     modal_token_id,
 )
@@ -28,6 +29,22 @@ def test_classify_labels_and_filters() -> None:
     classified = classify_valid_trials(trials, LENS)
     labels = {(row["token_id"], row["label"]) for row in classified}
     assert labels == {(7, "modal"), (9, "novel")}
+
+
+def test_lens_visibility_slices() -> None:
+    lens = {
+        "p1": {"prompt_id": "p1", "num_layers": 4, "lens_argmax_per_layer": [10, 20, 30, 7]},
+    }
+    classified = [
+        {"prompt_id": "p1", "token_id": 7, "commitment_depth": 3, "label": "modal"},
+        {"prompt_id": "p1", "token_id": 20, "commitment_depth": 4, "label": "novel"},  # ever top-1 (layer 1)
+        {"prompt_id": "p1", "token_id": 99, "commitment_depth": 4, "label": "novel"},  # never top-1
+    ]
+    vis = lens_visibility(classified, lens)
+    assert vis["modal_depth_hist"] == {"3": 1}
+    assert vis["novel_total"] == 2
+    assert vis["novel_ever_top1"] == 1
+    assert vis["novel_ever_top1_rate"] == 0.5
 
 
 def test_depth_groups_split() -> None:
