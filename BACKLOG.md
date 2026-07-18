@@ -76,12 +76,12 @@ This backlog is derived from `lightning_decoding_project_plan.md`. Checkboxes he
 - [x] 4.1 Implement Pythia/Qwen logit-lens projection helper.
 - [x] 4.2 Implement commitment-depth helper.
 - [x] 4.3 Add raw per-layer lens argmax recording.
-- [ ] 4.4 Run calibrated nucleus decoder for R=50 trials per Task A prompt with hidden-state capture. (Pipeline verified at reduced scale: nucleus p=0.95, R=15; full calibrated R=50 run pending.)
+- [x] 4.4 Run calibrated nucleus decoder for R=50 trials per Task A prompt with hidden-state capture. (Nucleus p=0.95, R=50 over the 20 Task-A categories; 136 valid trials, 3.82 distinct valid/prompt. `configs/phase4_lens.yaml`.)
 - [x] 4.5 Label valid produced tokens as modal or novel.
 - [x] 4.6 Compare mean commitment depth with Mann-Whitney U test.
 - [x] 4.7 Plot layerwise commitment histograms for modal vs novel tokens.
 - [x] 4.A Verify lens sanity check on `"The capital of France is"`. (Lens sharpens to " Paris" with the "...is the city of" continuation and the final-layer lens argmax matches the model head.)
-- [x] 4.B Verify depth comparison plot and test statistic exist. (Reduced-scale run: U=341, p=2.8e-10, novel commits ~1.5 layers later; regenerate for headline numbers after full calibration.)
+- [x] 4.B Verify depth comparison plot and test statistic exist. (Full R=50: U=3600, p=1.5e-30; modal commits at layers 10-11, only 3% of novel valid tokens ever surface as the top lens prediction.)
 
 ## Phase 5 - Writeup
 

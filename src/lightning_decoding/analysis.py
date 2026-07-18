@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from collections import Counter
 from pathlib import Path
 from statistics import mean, median
 from typing import Any
@@ -104,6 +105,36 @@ def compare_depths(modal: list[int], novel: list[int]) -> dict[str, Any]:
     return result
 
 
+def lens_visibility(
+    classified: list[dict[str, Any]], lens_by_prompt: dict[str, dict[str, Any]]
+) -> dict[str, Any]:
+    """Structure behind the modal/novel depth gap.
+
+    ``commitment_depth`` alone parks every novel token at ``num_layers`` (a novel token
+    can never be the sustained top prediction, since the final-layer lens argmax is the
+    modal token by definition). This records the informative slices instead: how deep
+    modal tokens actually commit, and how many novel tokens ever surface as the top lens
+    prediction at *any* layer.
+    """
+    modal_depth_hist: Counter[int] = Counter()
+    novel_total = 0
+    novel_ever_top1 = 0
+    for row in classified:
+        if row["label"] == "modal":
+            modal_depth_hist[row["commitment_depth"]] += 1
+            continue
+        novel_total += 1
+        sequence = lens_by_prompt[row["prompt_id"]]["lens_argmax_per_layer"]
+        if row["token_id"] in sequence:
+            novel_ever_top1 += 1
+    return {
+        "modal_depth_hist": {str(depth): count for depth, count in sorted(modal_depth_hist.items())},
+        "novel_total": novel_total,
+        "novel_ever_top1": novel_ever_top1,
+        "novel_ever_top1_rate": (novel_ever_top1 / novel_total) if novel_total else None,
+    }
+
+
 def save_commitment_histogram(
     modal: list[int],
     novel: list[int],
@@ -150,6 +181,7 @@ def analyze_depth(run_dir: str | Path) -> dict[str, Any]:
 
     num_layers = next(iter(lens_by_prompt.values()))["num_layers"]
     comparison["num_layers"] = num_layers
+    comparison["visibility"] = lens_visibility(classified, lens_by_prompt)
     comparison["run_dir"] = str(run_dir)
 
     with (run_dir / "depth_comparison.json").open("w", encoding="utf-8") as handle:
