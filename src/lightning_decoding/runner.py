@@ -19,7 +19,7 @@ from lightning_decoding.lens import (
 )
 from lightning_decoding.metrics import summarize
 from lightning_decoding.model_io import format_prompt, load_model
-from lightning_decoding.noise import NoiseState
+from lightning_decoding.noise import NoiseState, noise_filter_from_scope
 from lightning_decoding.tasks import Task, load_task
 
 
@@ -46,7 +46,8 @@ def build_method_cfg(cfg: dict[str, Any], model: Any) -> dict[str, Any]:
     method_cfg = dict(cfg["decoder"])
     method_cfg["global_seed"] = int(cfg.get("seed", 0))
     if method_cfg["method"] == "ensemble_minority":
-        method_cfg["_noise_state"] = NoiseState(model)
+        filter_fn = noise_filter_from_scope(method_cfg.get("noise_scope"))
+        method_cfg["_noise_state"] = NoiseState(model, filter_fn=filter_fn)
     return method_cfg
 
 

@@ -9,7 +9,7 @@ from typing import Any
 from lightning_decoding.config import config_hash, load_config
 from lightning_decoding.metrics import summarize
 from lightning_decoding.model_io import load_model
-from lightning_decoding.noise import NoiseState
+from lightning_decoding.noise import NoiseState, noise_filter_from_scope
 from lightning_decoding.runner import run_trials
 from lightning_decoding.tasks import load_task
 
@@ -58,12 +58,14 @@ def compare_baselines(
     r = int(trials or cfg["experiment"].get("trials_per_prompt", 20))
 
     rows: list[dict[str, Any]] = []
+    method_records: dict[str, list[dict[str, Any]]] = {}
     for spec in baselines:
         method_cfg = {k: v for k, v in spec.items() if k != "label"}
         label = spec.get("label", method_cfg["method"])
         method_cfg["global_seed"] = seed
         if method_cfg["method"] == "ensemble_minority":
-            method_cfg["_noise_state"] = NoiseState(model)
+            filter_fn = noise_filter_from_scope(method_cfg.get("noise_scope"))
+            method_cfg["_noise_state"] = NoiseState(model, filter_fn=filter_fn)
         print(f"running baseline {label} ({method_cfg['method']})")
         records, _ = run_trials(
             model,
@@ -76,6 +78,7 @@ def compare_baselines(
             trials=r,
             progress=False,
         )
+        method_records[label] = records
         summary = summarize(records, answer_space_sizes)
         rows.append({"label": label, "method": method_cfg["method"], **summary})
 
@@ -98,6 +101,13 @@ def compare_baselines(
     )
     save_comparison_bar(rows, "validity_rate", out_dir / "comparison_validity.png")
 
+    labels = [row["label"] for row in rows]
+    breakdown = build_answer_breakdown(method_records, prompts)
+    with (out_dir / "answers.json").open("w", encoding="utf-8") as handle:
+        json.dump(breakdown, handle, indent=2, sort_keys=False)
+        handle.write("\n")
+    save_answers_markdown(breakdown, labels, out_dir / "answers.md", task_name=task.name)
+
     report = {
         "created_at": datetime.now(timezone.utc).isoformat(),
         "config": str(config_path),
@@ -112,6 +122,70 @@ def compare_baselines(
         json.dump(report, handle, indent=2, sort_keys=True, default=str)
         handle.write("\n")
     return report
+
+
+def build_answer_breakdown(
+    method_records: dict[str, list[dict[str, Any]]], prompts: list[dict[str, str]]
+) -> list[dict[str, Any]]:
+    """Per prompt, the distinct answers each method produced, with counts and validity.
+
+    Answers are keyed by their normalized form (falling back to the raw token) and sorted
+    most-frequent first, so you can read off exactly what each decoder would have said.
+    """
+    order = [p["prompt_id"] for p in prompts]
+    keys = {p["prompt_id"]: p["key"] for p in prompts}
+    breakdown: list[dict[str, Any]] = []
+    for prompt_id in order:
+        methods: dict[str, list[dict[str, Any]]] = {}
+        for label, records in method_records.items():
+            tally: dict[str, list[Any]] = {}
+            for row in records:
+                if row["prompt_id"] != prompt_id:
+                    continue
+                display = row["normalized"] or (row["token_str"].strip() or "∅")
+                slot = tally.setdefault(display, [0, False])
+                slot[0] += 1
+                slot[1] = slot[1] or bool(row["valid"])
+            methods[label] = sorted(
+                ({"answer": a, "count": c, "valid": v} for a, (c, v) in tally.items()),
+                key=lambda x: (-x["count"], x["answer"]),
+            )
+        breakdown.append({"prompt_id": prompt_id, "key": keys[prompt_id], "methods": methods})
+    return breakdown
+
+
+def save_answers_markdown(
+    breakdown: list[dict[str, Any]],
+    labels: list[str],
+    output_path: str | Path,
+    *,
+    task_name: str,
+    max_show: int = 8,
+) -> None:
+    """Side-by-side table: one row per prompt, one column per decoder."""
+    def cell(answers: list[dict[str, Any]]) -> str:
+        if not answers:
+            return "—"
+        shown = answers[:max_show]
+        parts = [f"{a['answer']}{'✓' if a['valid'] else '✗'}({a['count']})" for a in shown]
+        text = ", ".join(parts)
+        if len(answers) > max_show:
+            text += f" +{len(answers) - max_show} more"
+        return text
+
+    lines = [
+        f"# Decoder outputs per prompt — {task_name} task",
+        "",
+        "Each cell lists the distinct answers a decoder produced, most frequent first. "
+        "`✓`/`✗` marks whether the answer is valid; `(n)` is how many of the trials gave it.",
+        "",
+        "| prompt | " + " | ".join(labels) + " |",
+        "|" + "---|" * (len(labels) + 1),
+    ]
+    for entry in breakdown:
+        cells = [cell(entry["methods"].get(label, [])) for label in labels]
+        lines.append(f"| {entry['key']} | " + " | ".join(cells) + " |")
+    Path(output_path).write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def save_comparison_bar(

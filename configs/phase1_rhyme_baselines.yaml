@@ -1,0 +1,20 @@
+extends: base.yaml
+name: phase1_rhyme_baselines
+
+task:
+  type: rhyme
+  path: data/rhymes.json
+  prompt_template: "A word that rhymes with {word} is"
+
+decoder:
+  method: greedy
+
+experiment:
+  trials_per_prompt: 20
+
+# Task B baselines (1.B). Knob values are placeholders until calibration.
+baselines:
+  - {label: greedy, method: greedy}
+  - {label: temperature, method: temperature, T: 1.0}
+  - {label: nucleus, method: nucleus, p: 0.95}
+  - {label: gap_sampler, method: gap_sampler, delta: 2.0}
