@@ -12,18 +12,30 @@ result at 160M, not a refutation** — the fair next test is scale (Phase 6: 410
 examples, and reasoning: `docs/parameter_study.md` (§7, §8, §8b, Verdict). Calibrated decoder knobs
 (gap δ=2, temperature T=0.7, nucleus p=0.95) are now stored in `configs/phase1_baselines.yaml`.
 
+## Decoder knobs — parameter study (docs/parameter_study.md)
+
+Swept every decoder's coefficient with per-word example outputs (category task, Pythia-160m):
+
+- **Gap sampler δ=2** is the best decoder — 3.09 distinct valid answers/prompt (the most of anything
+  tested), cleanest outputs; δ=1 barely leaves greedy, δ≥6 collapses to noise.
+- **Temperature T=0.7**, not the 1.0 default — beats 1.0 on both validity (0.29 vs 0.15) and diversity
+  (2.57 vs 1.92); T≥1.3 degrades into sub-word fragments.
+- **Nucleus `p` is a near no-op** — outputs barely change from p=0.85 to 0.995 (the raw distribution is
+  sharp, so widening the nucleus only admits tail tokens that are never sampled).
+- Added a per-word `answers.md` side-by-side output to `compare-baselines`, and a configurable
+  perturbation `noise_scope` (attention/MLP components + layer bands) that drove the §8 scope study.
+- Test suite is now 38 passing.
+
 ## Current State
 
 The repository has been scaffolded, committed, and pushed to the public GitHub repository:
 
 - Repository: `gdallas/lightning_ai`
-- Branch: `main`
-- Latest pushed commit at the time of this note: `51a96fe`
+- Branch: `main` (scaffold was `51a96fe`; main has advanced well past it — see git log)
 
-Phase 0 is verified. Phase 1 harness is now complete enough to run baselines and
-calibrate knobs; the remaining Phase 1 gaps are the full baseline table (1.B/1.C),
-wordlist expansion (1.3/1.4), and the greedy validity gate (1.A), which does not
-pass at the Pythia-160m scale (see below).
+Phases 0-2 and 4 are done; the H0 verdict (Phase 3) is in. Remaining Phase 1 gaps are the
+rhyme-task baseline (1.B), wordlist expansion (1.3/1.4), and the greedy validity gate (1.A),
+which does not pass at the Pythia-160m scale (model-capacity limit).
 
 ## This Session
 
@@ -188,26 +200,23 @@ No experiment folders are committed; `results/` is gitignored (contains only `.g
 
 ## Blocked Or Not Yet Verified
 
-- Full Phase 1 baseline experiments (1.B/1.C) have not been run at full scale yet.
-- Greedy Task A validity is measured (0.50) but does **not** meet the 0.80 gate (1.A) at 160m.
-- Full-scale knob calibration has not been run; only a 3-prompt x 2-trial verification pass.
-- Ensemble sigma calibration (2.10) is still not implemented (temperature/nucleus/gap are).
+- 1.B: the category baseline table is done; the **rhyme task (Task B)** baseline has not been run.
+- 1.A: greedy validity 0.50 does **not** meet the 0.80 gate at 160M (model-capacity limit, not a bug).
+- 2.B: ensemble validity 0.17-0.28 does **not** meet the 0.90 bar — part of the H0 verdict.
 - Category wordlists are still ~20 entries each (1.3/1.4 not started).
+- The ensemble numbers rest on reduced-scale runs (R=2-4, to fit a 10-min-per-run cap); the
+  *directions* are firm and consistent across configs, but exact values are indicative.
 
 ## Next Recommended Steps
 
-1. Run a full knob calibration and store the results:
+The core hypothesis is answered (H0) at 160M. Two live directions:
 
-   ```powershell
-   .\.venv\Scripts\python.exe -m lightning_decoding.cli calibrate configs\phase1_baselines.yaml --write-config --local-files-only
-   ```
+1. **Scale up (Phase 6):** repeat greedy / gap δ=2 / ensemble on Pythia-410M then 1B to test whether
+   the perturbation effect appears *at all* at larger scale (needs model downloads + more compute);
+   plot effect size vs model size.
+2. **Write up the negative result (Phase 5):** center it on the commitment-depth study (valid
+   alternatives ~3% visible to the late layers) + the gap histogram, with the decoder-knob
+   recommendations as the practical takeaway.
 
-   Then confirm the `calibrated:` block written into `configs/phase1_baselines.yaml` (1.22).
-2. Produce the full baseline table (1.B) and check the gap-sampler-beats-greedy claim (1.C)
-   by running each method config at full trial counts and comparing `summary.csv` files.
-3. Decide how to handle the 1.A gate: either scale up the model (Phase 6, 410m/1b) or
-   relax the acceptance criterion, since 0.80 greedy validity is unreachable at 160m.
-4. Expand category wordlists to 50-300 accepted answers and spot-check them (1.3/1.4).
-5. Add ensemble sigma calibration (2.10) to the calibration grid/runner.
-6. Rerun the Phase 4 depth study at R=50 with the calibrated nucleus `p` for headline
-   numbers (4.4), then regenerate `depth_comparison.json` + histogram via `analyze-depth`.
+Smaller loose ends: run the rhyme (Task B) baseline to finish the 4x2 table (1.B); expand category
+wordlists (1.3/1.4); re-run the ensemble sweeps at higher R if a firmer negative is wanted.
