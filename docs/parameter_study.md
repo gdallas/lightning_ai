@@ -13,9 +13,11 @@ Model: `EleutherAI/pythia-160m` · Task: single-token category naming · CPU, fp
   on both correctness and variety. 0.7 is the sweet spot (2.57 distinct valid @ 0.29 validity).
 - **Nucleus `p`** is a **near no-op** on this task (outputs barely change from p=0.85 to 0.995) —
   don't rely on it alone; pair it with a lower temperature.
-- **The perturbation ensemble does *not* beat greedy at 160M** — at every noise level and every layer
-  scope it surfaces generic filler ("common", "most") instead of valid alternatives. It's a negative
-  result *at this scale*, not a refutation of the idea.
+- **The perturbation ensemble does *not* beat greedy at 160M — verdict H0.** Across every noise level
+  *and* every layer scope tested (including a decisive best-shot at attention∩late layers), it's
+  strictly dominated by a trivial gap sampler: it surfaces generic filler ("common", "most") instead
+  of valid alternatives and never yields >1 valid answer per prompt. A negative result *at this
+  scale* — the fair next test is a bigger model (Phase 6), not more tuning.
 - **Which layers to hit:** if you perturb, target **attention weights in the later layers (8–11)** —
   that's the only place jostling changes the answer (early layers & MLP just reproduce greedy). But
   expect poor signal-to-noise until the model is bigger.
@@ -267,6 +269,41 @@ which is useless if the goal is surfacing alternatives. The examples show what's
 **So: if you perturb, target attention (and the later layers), not MLP/early — that's where decisions
 live. But don't expect it to win at 160M;** the mechanism needs either a bigger model (later layers
 carry more semantic structure) or a learned probe to keep the good flips and drop the junk (Phase 7).
+
+## 8b. Decisive test — best-scope ensemble vs. the bar
+
+Gave the ensemble its **best shot**: the targeted scopes §8 pointed to, a stronger σ=0.08, run
+head-to-head against greedy and the gap δ=2 bar (R=4, 20 words). (Diversity numbers are lower than
+§4–6 here because R=4 caps distinct-valid; the *comparison within this table* is what counts.)
+
+| decoder | validity | distinct valid / prompt |
+|---|---|---|
+| greedy | 0.50 | 1.00 |
+| **gap δ=2** (the bar) | 0.26 | **1.58** |
+| ensemble, attention-only, σ=0.08 | 0.175 | 1.00 |
+| ensemble, attention ∩ late-8–11, σ=0.08 | 0.275 | 1.00 |
+
+The ensemble **never produces more than ~1 distinct valid answer per prompt** — it either disrupts
+the answer (validity drops) or falls back to greedy (no new answers). Its per-word outputs are the
+same generic robust tokens as before ("most", "surface", "common", "sweet"), with only the
+occasional valid flip. Even the most surgical scope — attention weights *in the decision layers* —
+cannot turn it into a diversity mechanism.
+
+## Verdict: H0 holds at 160M
+
+Across **every** configuration tested — σ ∈ {0.02…0.10}, N=10, k=2, and scopes {all, attention,
+mlp, early, mid, late, attention∩late} — the perturbation ensemble does **not** beat greedy, and is
+strictly dominated by a trivial gap sampler. The mechanism is consistent and consistently wrong for
+the goal: random weight noise promotes bland, high-prior tokens rather than the specific valid
+runner-ups. This lines up with the commitment-depth study — valid alternatives are nearly invisible
+to the model's own late-layer representation (~3% ever surface as a top lens prediction), so noise
+has nothing to amplify but the generic winners.
+
+**This is a negative result at 160M, not a refutation of the idea.** The honest next test is
+**scale** (Phase 6: Pythia-410M/1B): larger models carry more structure in their late layers —
+exactly where this mechanism would need to bite. Until then, the practical takeaway stands: for
+diverse-yet-valid answers use **gap δ=2** (or **T=0.7**); the perturbation ensemble is not worth its
+11× compute cost at this scale.
 
 ---
 

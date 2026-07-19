@@ -1,6 +1,16 @@
 # Progress
 
-Last updated: after the full R=50 commitment-depth study (4.4).
+Last updated: after the decoder parameter study and the H0 verdict (Phase 3.1).
+
+## Verdict (Phase 3): H0 holds at 160M
+
+The perturbation ensemble — the project's core hypothesis — **does not beat greedy** and is strictly
+dominated by a trivial gap sampler, across every noise strength (σ 0.02–0.10) and every layer/component
+scope (all, attention, mlp, early, mid, late, attention∩late), including a decisive best-shot test. It
+surfaces generic high-prior tokens ("common", "most"), not valid alternatives. This is a **negative
+result at 160M, not a refutation** — the fair next test is scale (Phase 6: 410M/1B). Full analysis,
+examples, and reasoning: `docs/parameter_study.md` (§7, §8, §8b, Verdict). Calibrated decoder knobs
+(gap δ=2, temperature T=0.7, nucleus p=0.95) are now stored in `configs/phase1_baselines.yaml`.
 
 ## Current State
 

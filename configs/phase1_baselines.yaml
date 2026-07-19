@@ -16,11 +16,18 @@ calibration_grid:
   gap_sampler:
     delta: [1, 2, 3, 4, 6]
 
-# The 4 Phase 1 baselines (1.B). Knob values are placeholders until a full
-# `calibrate --write-config` sweep fills them in; edit them to the calibrated knobs.
+# Calibrated decoder knobs, chosen empirically in docs/parameter_study.md (a wider
+# sweep than calibration_grid: T in 0.5-2.0, gap 1-8). Selection: max distinct valid
+# per prompt at acceptable validity, on Pythia-160m / category task.
+calibrated:
+  temperature: {T: 0.7}   # 2.57 distinct valid @ 0.29 validity; beats T=1.0 on both axes
+  nucleus: {p: 0.95}      # weak knob — p barely matters; pair with lower T
+  gap_sampler: {delta: 2} # 3.09 distinct valid @ 0.26 validity — best decoder overall
+
+# The 4 Phase 1 baselines (1.B), now at calibrated knobs.
 baselines:
   - {label: greedy, method: greedy}
-  - {label: temperature, method: temperature, T: 1.0}
+  - {label: temperature, method: temperature, T: 0.7}
   - {label: nucleus, method: nucleus, p: 0.95}
   - {label: gap_sampler, method: gap_sampler, delta: 2.0}
 

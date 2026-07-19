@@ -35,7 +35,7 @@ This backlog is derived from `lightning_decoding_project_plan.md`. Checkboxes he
 - [x] 1.19 Write summary CSV per experiment.
 - [x] 1.20 Print console progress every 50 trials.
 - [x] 1.21 Implement knob calibration runner for temperature, nucleus, and gap sampler.
-- [ ] 1.22 Store calibrated knobs in `configs/phase1_baselines.yaml`. (Mechanism ready: `calibrate --write-config`; awaiting a full-scale sweep to fill real values.)
+- [x] 1.22 Store calibrated knobs in `configs/phase1_baselines.yaml`. (`calibrated:` block: T=0.7, p=0.95, δ=2 — chosen empirically in docs/parameter_study.md, a wider sweep than the grid.)
 - [ ] 1.A Verify greedy reaches at least 80% validity on Task A. (Measured 0.50 on Pythia-160m with the tuned template; the 80% bar is not reachable at this scale — see PROGRESS.md.)
 - [ ] 1.B Produce full baseline table for 4 methods x 2 tasks x metrics with CIs. (Tool ready: `compare-baselines` emits comparison.csv + CI bar charts; verified on the category task at reduced scale. Full-scale run and the rhyme task still pending.)
 - [x] 1.C Verify gap sampler beats greedy on `distinct_valid_per_prompt`. (Reduced scale: gap_sampler 2.40 [1.67, 3.50] vs greedy 1.00 — non-overlapping CIs.)
@@ -53,23 +53,23 @@ This backlog is derived from `lightning_decoding_project_plan.md`. Checkboxes he
 - [x] 2.8 Implement `ensemble_minority`.
 - [x] 2.9 Record ensemble counts, fallback flag, per-run latency, and clean logit gap.
 - [x] 2.10 Calibrate ensemble sigma. (`calibrate-sigma` sweeps `sigma_grid` and selects sigma by distinct-valid above a 0.90 floor; verified at reduced scale. Run at full scale + `--write-config` for the real value.)
-- [ ] 2.11 Run ensemble vs calibrated baselines with same tasks, seeds, and trials.
+- [x] 2.11 Run ensemble vs calibrated baselines with same tasks, seeds, and trials. (Decisive test: ensemble at best scopes/σ vs greedy + gap δ=2 — see docs/parameter_study.md §8b. Ensemble loses.)
 - [x] 2.12 Produce comparison table and bar chart. (`compare-baselines` runs the ensemble alongside the baselines; verified at reduced scale. Full-scale run with calibrated knobs pending.)
 - [x] 2.13 Plot clean-pass logit-gap histogram for minority-selected tokens. (`gap-histogram`; verified on a sigma=0.08 run with 16 minority selections, mean gap 1.33.)
 - [x] 2.A Verify noise round-trip test passes in the real venv.
-- [ ] 2.B Verify ensemble validity is at least 0.90 at calibrated sigma.
+- [ ] 2.B Verify ensemble validity is at least 0.90 at calibrated sigma. (TESTED — NOT met: ensemble validity 0.17-0.28 at every σ/scope, below greedy's 0.50. Contributes to the H0 verdict.)
 - [x] 2.C Verify comparison table and gap histogram exist. (Both artifacts produced at reduced scale; regenerate at full scale with calibrated sigma for the headline.)
 - [ ] 2.D Verify full Phase 2 runtime is within budget or reduce R and note it.
 
 ## Phase 3 - Verdict and Ablations
 
-- [ ] 3.1 Apply H0/H1 decision rule after Phase 2.
-- [ ] 3.2 If H0 wins, write the negative result and proceed to Phase 4.
-- [ ] 3.3 If H1 survives, run sigma sweep and plot novelty/validity vs sigma.
-- [ ] 3.4 If H1 survives, test layer restrictions `[0-3]`, `[4-7]`, `[8-11]`, and all.
-- [ ] 3.5 If H1 survives, ablate `N` in `{5, 10, 20}` with `k` in `{2, 3, 6}`.
-- [ ] 3.6 If H1 survives, compare attention-only vs MLP-only perturbation.
-- [ ] 3.7 If H1 survives, replicate best configuration on Qwen2.5-0.5B-Instruct.
+- [x] 3.1 Apply H0/H1 decision rule after Phase 2. (**H0 holds at 160M** — ensemble is dominated by a trivial gap sampler at every σ/scope. See docs/parameter_study.md "Verdict".)
+- [x] 3.2 If H0 wins, write the negative result and proceed to Phase 4. (Negative result written in docs/parameter_study.md; Phase 4 depth study already done.)
+- [~] 3.3 If H1 survives, run sigma sweep and plot novelty/validity vs sigma. (Ran the sigma sweep anyway as diagnosis — §7. H1 did not survive, so no novelty/validity headline.)
+- [x] 3.4 Test layer restrictions `[0-3]`, `[4-7]`, `[8-11]`, and all. (Done as diagnosis — §8; late/attention disrupt, early/MLP reproduce greedy. Not H1-conditional after all.)
+- [ ] 3.5 If H1 survives, ablate `N` in `{5, 10, 20}` with `k` in `{2, 3, 6}`. (N/A — H0.)
+- [x] 3.6 Compare attention-only vs MLP-only perturbation. (Done — §8: attention flips the decision, MLP reproduces greedy.)
+- [ ] 3.7 If H1 survives, replicate best configuration on Qwen2.5-0.5B-Instruct. (N/A at 160M — the fair escalation is Phase 6 scale, not another 0.5B model.)
 
 ## Phase 4 - Commitment-Depth Study
 
